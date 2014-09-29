@@ -1,3 +1,4 @@
+fs = require('fs')
 path = require('path')
 jsonXlsx = require('../lib/icg-json-to-xlsx')
 
@@ -8,9 +9,9 @@ jsonData = [
 ]
 
 
-filename = path.join(__dirname, "basic-sheet-with-headers-output.xlsx")
-headers = ["Is User Member?", "First Name", "Age"]
+filename = path.join(__dirname, "basic-sheet-via-buffer-output.xlsx")
 
-outputFile = jsonXlsx.writeFile(filename, jsonData, {headers:headers})
-
-console.log outputFile
+buffer = jsonXlsx.writeBuffer(jsonData)
+if buffer
+  fs.writeFile filename, buffer, (err)->
+    console.log filename

@@ -11,6 +11,6 @@ jsonData = [
 filename = path.join(__dirname, "full-example.xlsx")
 headers = ["Is User Member?", "First Name", "Age"]
 
-outputFile = jsonXlsx(filename, jsonData, {headers:headers, sheetName:"Roster"})
+outputFile = jsonXlsx.writeFile(filename, jsonData, {headers:headers, sheetName:"Roster"})
 
 console.log outputFile

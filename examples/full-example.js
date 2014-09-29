@@ -26,7 +26,7 @@
 
   headers = ["Is User Member?", "First Name", "Age"];
 
-  outputFile = jsonXlsx(filename, jsonData, {
+  outputFile = jsonXlsx.writeFile(filename, jsonData, {
     headers: headers,
     sheetName: "Roster"
   });

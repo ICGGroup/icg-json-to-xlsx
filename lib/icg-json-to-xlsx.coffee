@@ -127,25 +127,42 @@ Workbook = ->
   @Sheets = {}
   return
 
-module.exports = (filename, data, options)->
 
-  if not filename or not data
-    throw new Error("filename and data parameters are required.")
-  else
-    options ||= {}
-    if not options.headers
-      options.headers = findHeaders(data)
-    if not options.sheetName
-      options.sheetName = "Sheet 1"
+buildWorkbook = (data, options)->
+  options ||= {}
+  if not options.headers
+    options.headers = findHeaders(data)
+  if not options.sheetName
+    options.sheetName = "Sheet 1"
 
 
-    opts = {headers:options.headers}
-    wb = new Workbook()
-    ws = sheetFromJson(data, opts);
+  opts = {headers:options.headers}
+  wb = new Workbook()
+  ws = sheetFromJson(data, opts);
 
-    wb.SheetNames.push(options.sheetName)
-    wb.Sheets[options.sheetName] = ws
+  wb.SheetNames.push(options.sheetName)
+  wb.Sheets[options.sheetName] = ws
 
-    XLSX.writeFile(wb, filename)
+  wb
 
-  return filename
+
+module.exports =
+  writeFile: (filename, data, options)->
+
+    if not filename or not data
+      throw new Error("filename and data parameters are required.")
+    else
+      wb = buildWorkbook(data, options)
+      XLSX.writeFile(wb, filename)
+
+    return filename
+
+  writeBuffer: (data, options)->
+    buffer = null
+    if not data
+      throw new Error("data parameter is required.")
+    else
+      wb = buildWorkbook(data, options)
+      buffer = XLSX.write(wb, {type:"buffer"})
+
+    return buffer

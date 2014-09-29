@@ -10,6 +10,6 @@ jsonData = [
 
 filename = path.join(__dirname, "basic-sheet-output.xlsx")
 
-outputFile = jsonXlsx(filename, jsonData)
+outputFile = jsonXlsx.writeFile(filename, jsonData)
 
 console.log outputFile
