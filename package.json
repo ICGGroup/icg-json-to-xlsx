@@ -1,6 +1,6 @@
 {
   "name": "icg-json-to-xlsx",
-  "version": "0.2.2 ",
+  "version": "0.2.2",
   "description": "A simple module to convert JSON to XLSX files.",
   "main": "lib/icg-json-to-xlsx.js",
   "scripts": {
