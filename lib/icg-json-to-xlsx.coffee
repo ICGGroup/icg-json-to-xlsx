@@ -25,6 +25,16 @@ findHeaders = (data, lookInFirst) ->
 
   final
 
+
+getAttrs = (data, lookInFirst) ->
+  limit = lookInFirst or 30
+  attrs = []
+  _.each data, (r, i) ->
+    for p of r
+      attrs.push p  unless _.contains(attrs, p)
+    false  if i is (limit - 1)
+  attrs
+
 sheetFromJson = (data, opts) ->
   ws = {}
   range =
@@ -41,10 +51,18 @@ sheetFromJson = (data, opts) ->
     headers = opts.headers
   else
     headers = findHeaders(data)
-  data.unshift headers
+  # derive the headers, based on property
+  headerObj = {}
+  _.each headers, (h, idx) ->
+    attr = opts.attributes[idx]
+    if attr
+      headerObj[attr] = h
+  data.unshift headerObj
   _.each data, (row, R) ->
     C = 0
-    _.each row, (val, prop) ->
+    console.log(opts)
+    _.each opts.attributes, (prop) ->
+      val = row[prop] || ""
       range.s.r = R  if range.s.r > R
       range.s.c = C  if range.s.c > C
       range.e.r = R  if range.e.r < R
@@ -79,48 +97,49 @@ sheetFromJson = (data, opts) ->
 
   ws["!ref"] = XLSX.utils.encode_range(range)  if range.s.c < 10000000
   ws
-sheetFromArrayOfArrays = (data, opts) ->
-  ws = {}
-  range =
-    s:
-      c: 10000000
-      r: 10000000
 
-    e:
-      c: 0
-      r: 0
-
-  R = 0
-
-  while R isnt data.length
-    C = 0
-
-    while C isnt data[R].length
-      range.s.r = R  if range.s.r > R
-      range.s.c = C  if range.s.c > C
-      range.e.r = R  if range.e.r < R
-      range.e.c = C  if range.e.c < C
-      cell = v: data[R][C]
-      continue  unless cell.v?
-      cell_ref = XLSX.utils.encode_cell(
-        c: C
-        r: R
-      )
-      if typeof cell.v is "number"
-        cell.t = "n"
-      else if typeof cell.v is "boolean"
-        cell.t = "b"
-      else if cell.v instanceof Date
-        cell.t = "n"
-        cell.z = XLSX.SSF._table[14]
-        cell.v = datenum(cell.v)
-      else
-        cell.t = "s"
-      ws[cell_ref] = cell
-      ++C
-    ++R
-  ws["!ref"] = XLSX.utils.encode_range(range)  if range.s.c < 10000000
-  ws
+# sheetFromArrayOfArrays = (data, opts) ->
+#   ws = {}
+#   range =
+#     s:
+#       c: 10000000
+#       r: 10000000
+#
+#     e:
+#       c: 0
+#       r: 0
+#
+#   R = 0
+#
+#   while R isnt data.length
+#     C = 0
+#
+#     while C isnt data[R].length
+#       range.s.r = R  if range.s.r > R
+#       range.s.c = C  if range.s.c > C
+#       range.e.r = R  if range.e.r < R
+#       range.e.c = C  if range.e.c < C
+#       cell = v: data[R][C]
+#       continue  unless cell.v?
+#       cell_ref = XLSX.utils.encode_cell(
+#         c: C
+#         r: R
+#       )
+#       if typeof cell.v is "number"
+#         cell.t = "n"
+#       else if typeof cell.v is "boolean"
+#         cell.t = "b"
+#       else if cell.v instanceof Date
+#         cell.t = "n"
+#         cell.z = XLSX.SSF._table[14]
+#         cell.v = datenum(cell.v)
+#       else
+#         cell.t = "s"
+#       ws[cell_ref] = cell
+#       ++C
+#     ++R
+#   ws["!ref"] = XLSX.utils.encode_range(range)  if range.s.c < 10000000
+#   ws
 Workbook = ->
   return new Workbook()  unless this instanceof Workbook
   @SheetNames = []
@@ -132,11 +151,17 @@ buildWorkbook = (data, options)->
   options ||= {}
   if not options.headers
     options.headers = findHeaders(data)
+
+  if not options.attributes
+    attrs = getAttrs(data)
+    console.log(attrs)
+    options.attributes = attrs
+
   if not options.sheetName
     options.sheetName = "Sheet 1"
 
 
-  opts = {headers:options.headers}
+  opts = {headers:options.headers, attributes:options.attributes}
   wb = new Workbook()
   ws = sheetFromJson(data, opts);
 
