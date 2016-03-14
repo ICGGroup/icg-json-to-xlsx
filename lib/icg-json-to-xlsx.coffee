@@ -60,7 +60,6 @@ sheetFromJson = (data, opts) ->
   data.unshift headerObj
   _.each data, (row, R) ->
     C = 0
-    console.log(opts)
     _.each opts.attributes, (prop) ->
       val = row[prop] || ""
       range.s.r = R  if range.s.r > R
@@ -154,7 +153,6 @@ buildWorkbook = (data, options)->
 
   if not options.attributes
     attrs = getAttrs(data)
-    console.log(attrs)
     options.attributes = attrs
 
   if not options.sheetName
